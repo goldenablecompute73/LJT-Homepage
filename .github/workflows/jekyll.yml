@@ -25,6 +25,8 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-24.04
+    outputs:
+      page_url: ${{ steps.pages.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -48,6 +50,7 @@ jobs:
         uses: actions/configure-pages@v6.0.0
         with:
           enablement: true
+        continue-on-error: true
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
@@ -58,6 +61,7 @@ jobs:
 
   # Deployment job
   deploy:
+    if: ${{ needs.build.outputs.page_url != '' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
